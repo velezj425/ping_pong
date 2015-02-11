@@ -1,7 +1,7 @@
 '''
 Created on Feb 10, 2015
 
-@author: MARIOASDJASLDMAKSDma
+@author: MARIOA
 '''
 from random import randint
 
