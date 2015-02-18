@@ -1,92 +1,86 @@
-'''
-Created on Feb 10, 2015
-
-@author: MARIOA
-Random Change(s)
-'''
-from random import randint
+### Skeleton code for pong game
 
 import pygame, sys
+from pygame.locals import *
 
-pygame.init()
-clock = pygame.time.Clock()
+# Number of frames per second
+# Change this value to speed up or slow down your game
+FPS = 200
 
-#defining colors
-white = (255, 255, 255)
-black = (0, 0, 0)
-red = (255, 0, 0)
+#Global Variables to be used through our program
+WINDOWWIDTH = 400
+WINDOWHEIGHT = 300
+LINETHICKNESS = 10
+PADDLESIZE = 50
+PADDLEOFFSET = 20
 
+# Set up the colours
+BLACK     = (0  ,0  ,0  )
+WHITE     = (255,255,255)
 
-gameDisplay = pygame.display.set_mode((1200, 720))
-pygame.display.set_caption("New Python Game")
-#updates the game display with the changes added to them
+#Draws the arena the game will be played in. 
+def drawArena():
+    DISPLAYSURF.fill((0,0,0))
+    #Draw outline of arena
+    pygame.draw.rect(DISPLAYSURF, WHITE, ((0,0),(WINDOWWIDTH,WINDOWHEIGHT)), LINETHICKNESS*2)
+    #Draw centre line
+    pygame.draw.line(DISPLAYSURF, WHITE, ((WINDOWWIDTH/2),0),((WINDOWWIDTH/2),WINDOWHEIGHT), (LINETHICKNESS/4))
 
-gameExit = False
+#Draws the paddle
+def drawPaddle(paddle):
+    #Stops paddle moving too low
+    if paddle.bottom > WINDOWHEIGHT - LINETHICKNESS:
+        paddle.bottom = WINDOWHEIGHT - LINETHICKNESS
+    #Stops paddle moving too high
+    elif paddle.top < LINETHICKNESS:
+        paddle.top = LINETHICKNESS
+    #Draws paddle
+    pygame.draw.rect(DISPLAYSURF, WHITE, paddle)
+  
+#draws the ball
+def drawBall(ball):
+    pygame.draw.rect(DISPLAYSURF, WHITE, ball)
 
-ball_x = 600
-ball_y = 360
+#Main function
+def main():
+    pygame.init()
+    global DISPLAYSURF
 
-lead_y = 300
-lead_y_change = 0
+    FPSCLOCK = pygame.time.Clock()
+    DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT)) 
+    pygame.display.set_caption('Pong')
 
-lead_y2 = 300
-lead_y2_change = 0
+    #Initiate variable and set starting positions
+    #any future changes made within rectangles
+    ballX = WINDOWWIDTH/2 - LINETHICKNESS/2
+    ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2
+    playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
+    playerTwoPosition = (WINDOWHEIGHT - PADDLESIZE) /2
 
-if randint(0,1) == 1:
-        ball_x += 20
-while not gameExit:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameExit = True
-            
-#Gives movement to the rectangle when the correct key is pressed down
-        if event.type == pygame.KEYDOWN:
-            if event.key ==pygame.K_UP:
-                lead_y_change -= 15
-            if event.key == pygame.K_DOWN:
-                lead_y_change += 15
-            if event.key == pygame.K_w:
-                lead_y2_change -= 15
-            if event.key == pygame.K_s:
-                lead_y2_change += 15
-                
-    #tells the program to stop the moving rectangle when the key currently being held is let go
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                lead_y2_change = 0
-            if event.key == pygame.K_w or event.key == pygame.K_s:
-                lead_y_change = 0
+    #Creates Rectangles for ball and paddles.
+    paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS,PADDLESIZE)
+    paddle2 = pygame.Rect(WINDOWWIDTH - PADDLEOFFSET - LINETHICKNESS, playerTwoPosition, LINETHICKNESS,PADDLESIZE)
+    ball = pygame.Rect(ballX, ballY, LINETHICKNESS, LINETHICKNESS)
 
-    
-    if ( (ball_x >= 1170) or (ball_x <= 30) ): # ( (ball_y == lead_y ) or (ball_y == lead_y2) ):
-            ball_x *= -1
-            print "true"
-            
-    else:
-            ball_x += 20
-            print "false"
-    
-    lead_y += lead_y_change
-    lead_y2 += lead_y2_change
-    
-    
-    
-    #Gives the black background 
-    gameDisplay.fill(black)
-    
-    #Player 2 location
-    pygame.draw.rect(gameDisplay, white, [0, lead_y2, 30, 100])
-    
-    #Player 1 location
-    pygame.draw.rect(gameDisplay, white, [1170, lead_y, 30, 100])
-    
-    #ball location
-    pygame.draw.rect(gameDisplay, white, [ball_x, ball_y, 20, 20])
-    pygame.display.update()
-    clock.tick(30)
-    print event
+    #Draws the starting position of the Arena
+    drawArena()
+    drawPaddle(paddle1)
+    drawPaddle(paddle2)
+    drawBall(ball)
 
-#exits pygame
-pygame.quit()
-quit()
-sys.exit()
+    while True: #main game loop
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        drawArena()
+        drawPaddle(paddle1)
+        drawPaddle(paddle2)
+        drawBall(ball)
+
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+
+if __name__=='__main__':
+    main()
