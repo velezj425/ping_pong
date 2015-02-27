@@ -5,7 +5,7 @@ from pygame.locals import *
 
 # Number of frames per second
 # Change this value to speed up or slow down your game
-FPS = 200
+FPS = 120
 
 #Global Variables to be used through our program
 WINDOWWIDTH = 400
@@ -40,6 +40,31 @@ def drawPaddle(paddle):
 #draws the ball
 def drawBall(ball):
     pygame.draw.rect(DISPLAYSURF, WHITE, ball)
+
+#Move the ball on the screen
+def moveBall(ball, deltaX, deltaY):
+	ball.x += deltaX
+	ball.y += deltaY
+	return ball
+
+#Check if the ball has hit either the top or the bottom
+#of the screen
+def checkBorderCollision(ball, deltaY):
+	if ball.top == (LINETHICKNESS) or ball.bottom == (WINDOWHEIGHT - LINETHICKNESS):
+	    deltaY = deltaY * -1
+	
+	return deltaY
+
+#Reset the ball in the starting position after someone has scored, and
+#give the ball the opposite trajectory
+def ballReset(ball, deltaX, ballX,ballY):
+    ballX = WINDOWWIDTH/2 - LINETHICKNESS/2
+    ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2
+    ball = pygame.Rect(ballX, ballY, LINETHICKNESS, LINETHICKNESS)
+    drawBall(ball)
+    deltaX = deltaX * -1
+	
+    return ball, deltaX, ballX, ballY
 
 #Main function
 def main():
@@ -78,6 +103,13 @@ def main():
         drawPaddle(paddle1)
         drawPaddle(paddle2)
         drawBall(ball)
+        
+        moveBall(ball, deltaX, deltaY)
+		deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
+		
+		#resets the ball at the center when a score is made
+		if ball.left == (0) or ball.right == (WINDOWWIDTH):
+			ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
