@@ -65,7 +65,21 @@ def ballReset(ball, deltaX, ballX,ballY):
     deltaX = deltaX * -1
 	
     return ball, deltaX, ballX, ballY
-
+    
+#Displays the score for player one
+def displayPlayerOneScore(score):
+	scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
+	scoreRect = scoreSurf.get_rect()
+	scoreRect.center = (100, 50)
+	DISPLAYSURF.blit(scoreSurf, scoreRect)
+	
+#Displays the score for player two
+def displayPlayerTwoScore(score):
+	scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
+	scoreRect = scoreSurf.get_rect()
+	scoreRect.center = (300, 50)
+	DISPLAYSURF.blit(scoreSurf, scoreRect)
+	
 #Main function
 def main():
     pygame.init()
@@ -105,11 +119,20 @@ def main():
         drawBall(ball)
         
         moveBall(ball, deltaX, deltaY)
-		deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
+	deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
 		
+	if ball.left == (0) or ball.right == (WINDOWWIDTH):
+		if ball.left == 0:
+			playerTwoScore += 1
+		else:
+			playerOneScore += 1
+			
 		#resets the ball at the center when a score is made
-		if ball.left == (0) or ball.right == (WINDOWWIDTH):
-			ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
+		ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
+		
+	#display scores
+	displayPlayerOneScore(playerOneScore)
+	displayPlayerTwoScore(playerTwoScore)
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
