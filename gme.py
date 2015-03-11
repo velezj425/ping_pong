@@ -18,9 +18,10 @@ PADDLEOFFSET = 20
 BLACK     = (0  ,0  ,0  )
 WHITE     = (255,255,255)
 
+
 #Draws the arena the game will be played in. 
 def drawArena():
-    DISPLAYSURF.fill((0,0,0))
+    DISPLAYSURF.fill(BLACK)
     #Draw outline of arena
     pygame.draw.rect(DISPLAYSURF, WHITE, ((0,0),(WINDOWWIDTH,WINDOWHEIGHT)), LINETHICKNESS*2)
     #Draw centre line
@@ -36,17 +37,17 @@ def drawPaddle(paddle):
         paddle.top = LINETHICKNESS
     #Draws paddle
     pygame.draw.rect(DISPLAYSURF, WHITE, paddle)
-  
+	
 #draws the ball
 def drawBall(ball):
     pygame.draw.rect(DISPLAYSURF, WHITE, ball)
-
+	
 #Move the ball on the screen
 def moveBall(ball, deltaX, deltaY):
 	ball.x += deltaX
 	ball.y += deltaY
 	return ball
-
+	
 #Check if the ball has hit either the top or the bottom
 #of the screen
 def checkBorderCollision(ball, deltaY):
@@ -65,7 +66,7 @@ def ballReset(ball, deltaX, ballX,ballY):
     deltaX = deltaX * -1
 	
     return ball, deltaX, ballX, ballY
-    
+	
 #Displays the score for player one
 def displayPlayerOneScore(score):
 	scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
@@ -84,7 +85,9 @@ def displayPlayerTwoScore(score):
 def main():
     pygame.init()
     global DISPLAYSURF
-
+    ##Font info
+    global BASICFONT
+    BASICFONT = pygame.font.Font('freesansbold.ttf', 18)
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH,WINDOWHEIGHT)) 
     pygame.display.set_caption('Pong')
@@ -93,8 +96,12 @@ def main():
     #any future changes made within rectangles
     ballX = WINDOWWIDTH/2 - LINETHICKNESS/2
     ballY = WINDOWHEIGHT/2 - LINETHICKNESS/2
+    deltaY = 1
+    deltaX = 1
     playerOnePosition = (WINDOWHEIGHT - PADDLESIZE) /2
     playerTwoPosition = (WINDOWHEIGHT - PADDLESIZE) /2
+    playerOneScore = 0
+    playerTwoScore = 0
 
     #Creates Rectangles for ball and paddles.
     paddle1 = pygame.Rect(PADDLEOFFSET,playerOnePosition, LINETHICKNESS,PADDLESIZE)
@@ -106,42 +113,42 @@ def main():
     drawPaddle(paddle1)
     drawPaddle(paddle2)
     drawBall(ball)
-
+	
     while True: #main game loop
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-		if event.key == pygame.K_DOWN and paddle1.y != WINDOWHEIGHT:
-		    paddle1.y += 30
-		elif event.key == pygame.K_UP and paddle1.y != LINETHICKNESS:
-		    paddle1.y -= 30
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_DOWN and paddle1.y != WINDOWHEIGHT:
+					paddle1.y += 30
+				elif event.key == pygame.K_UP and paddle1.y != LINETHICKNESS:
+					paddle1.y -= 30
 
-        drawArena()
-        drawPaddle(paddle1)
-        drawPaddle(paddle2)
-        drawBall(ball)
-        
-        moveBall(ball, deltaX, deltaY)
-	deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
+		drawArena()
+		drawPaddle(paddle1)
+		drawPaddle(paddle2)
+		drawBall(ball)
 		
-	if ball.left == (0) or ball.right == (WINDOWWIDTH):
-		if ball.left == 0:
-			playerTwoScore += 1
-		else:
-			playerOneScore += 1
+		moveBall(ball, deltaX, deltaY)
+		deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
+		
+		if ball.left == 0 or ball.right == WINDOWWIDTH:
+			if ball.left == 0:
+				playerTwoScore += 1
+			else:
+				playerOneScore += 1
 			
-		#resets the ball at the center when a score is made
-		ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
+			#resets the ball at the center when a score is made
+			ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
 		
-	#display scores
-	displayPlayerOneScore(playerOneScore)
-	displayPlayerTwoScore(playerTwoScore)
-
-        pygame.display.update()
-        FPSCLOCK.tick(FPS)
-
+		#display scores
+		displayPlayerOneScore(playerOneScore)
+		displayPlayerTwoScore(playerTwoScore)
+		
+		pygame.display.update()
+		FPSCLOCK.tick(FPS)
+		
 # this is a prototype code for the start menu in the pong game:
 #It will have 4 options; Single Player (AI controlled), Multiplayer (Same keyboard), High Scores (From MongoDB), Options (Player colors, Difficulty(?) )
 
