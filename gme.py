@@ -112,6 +112,11 @@ def main():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+		if event.key == pygame.K_DOWN and paddle1.y != WINDOWHEIGHT:
+		    paddle1.y += 30
+		elif event.key == pygame.K_UP and paddle1.y != LINETHICKNESS:
+		    paddle1.y -= 30
 
         drawArena()
         drawPaddle(paddle1)
