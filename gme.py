@@ -37,24 +37,40 @@ def drawPaddle(paddle):
         paddle.top = LINETHICKNESS
     #Draws paddle
     pygame.draw.rect(DISPLAYSURF, WHITE, paddle)
-	
+    
 #draws the ball
 def drawBall(ball):
     pygame.draw.rect(DISPLAYSURF, WHITE, ball)
-	
+    
 #Move the ball on the screen
 def moveBall(ball, deltaX, deltaY):
-	ball.x += deltaX
-	ball.y += deltaY
-	return ball
+    ball.x += deltaX
+    ball.y += deltaY
+    return ball
+    
+#Check if the ball has hit either paddle
+def checkPaddleCollision(ball, paddle1, paddle2, deltaX):
+    if ball.left == paddle1.right and ball.top >= paddle1.top and ball.bottom <= paddle1.bottom:
+	    deltaX *= -1
+    elif ball.right == paddle2.left and ball.top >= paddle2.top and ball.bottom <= paddle2.bottom:
+        deltaX *= -1
+    return deltaX
+	
+#Allow player 2's paddle to be controlled by the computer
+def paddleTwoIntelligence(ball, deltaX, paddle2):
+    if 	deltaX == 1:
+	    if ball.top < paddle2.top:
+		    paddle2.y -= 1
+	    elif ball.bottom > paddle2.bottom:
+	        paddle2.y += 1
 	
 #Check if the ball has hit either the top or the bottom
 #of the screen
 def checkBorderCollision(ball, deltaY):
-	if ball.top == (LINETHICKNESS) or ball.bottom == (WINDOWHEIGHT - LINETHICKNESS):
-	    deltaY = deltaY * -1
-	
-	return deltaY
+    if ball.top == (LINETHICKNESS) or ball.bottom == (WINDOWHEIGHT - LINETHICKNESS):
+        deltaY = deltaY * -1
+    
+    return deltaY
 
 #Reset the ball in the starting position after someone has scored, and
 #give the ball the opposite trajectory
@@ -64,23 +80,23 @@ def ballReset(ball, deltaX, ballX,ballY):
     ball = pygame.Rect(ballX, ballY, LINETHICKNESS, LINETHICKNESS)
     drawBall(ball)
     deltaX = deltaX * -1
-	
+    
     return ball, deltaX, ballX, ballY
-	
+    
 #Displays the score for player one
 def displayPlayerOneScore(score):
-	scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
-	scoreRect = scoreSurf.get_rect()
-	scoreRect.center = (100, 50)
-	DISPLAYSURF.blit(scoreSurf, scoreRect)
-	
+    scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
+    scoreRect = scoreSurf.get_rect()
+    scoreRect.center = (100, 50)
+    DISPLAYSURF.blit(scoreSurf, scoreRect)
+    
 #Displays the score for player two
 def displayPlayerTwoScore(score):
-	scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
-	scoreRect = scoreSurf.get_rect()
-	scoreRect.center = (300, 50)
-	DISPLAYSURF.blit(scoreSurf, scoreRect)
-	
+    scoreSurf = BASICFONT.render('%s' %(score), True, WHITE)
+    scoreRect = scoreSurf.get_rect()
+    scoreRect.center = (300, 50)
+    DISPLAYSURF.blit(scoreSurf, scoreRect)
+    
 #Main function
 def main():
     pygame.init()
@@ -113,42 +129,46 @@ def main():
     drawPaddle(paddle1)
     drawPaddle(paddle2)
     drawBall(ball)
-	
+    
     while True: #main game loop
-		for event in pygame.event.get():
-			if event.type == QUIT:
-				pygame.quit()
-				sys.exit()
-			elif event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_DOWN and paddle1.y != WINDOWHEIGHT:
-					paddle1.y += 30
-				elif event.key == pygame.K_UP and paddle1.y != LINETHICKNESS:
-					paddle1.y -= 30
 
-		drawArena()
-		drawPaddle(paddle1)
-		drawPaddle(paddle2)
-		drawBall(ball)
-		
-		moveBall(ball, deltaX, deltaY)
-		deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
-		
-		if ball.left == 0 or ball.right == WINDOWWIDTH:
-			if ball.left == 0:
-				playerTwoScore += 1
-			else:
-				playerOneScore += 1
-			
-			#resets the ball at the center when a score is made
-			ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
-		
-		#display scores
-		displayPlayerOneScore(playerOneScore)
-		displayPlayerTwoScore(playerTwoScore)
-		
-		pygame.display.update()
-		FPSCLOCK.tick(FPS)
-		
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN and paddle1.y != WINDOWHEIGHT:
+                    paddle1.y += 30
+                elif event.key == pygame.K_UP and paddle1.y != LINETHICKNESS:
+                    paddle1.y -= 30
+
+        drawArena()
+        drawPaddle(paddle1)
+        drawPaddle(paddle2)
+        drawBall(ball)
+        
+        moveBall(ball, deltaX, deltaY)
+        paddleTwoIntelligence(ball, deltaX, paddle2)
+        deltaY = checkBorderCollision(ball, deltaY) #makes the ball bounce off the top or bottom
+        deltaX = checkPaddleCollision(ball, paddle1, paddle2, deltaX)
+
+
+        if ball.left == 0 or ball.right == WINDOWWIDTH:
+            if ball.left == 0:
+                playerTwoScore += 1
+            else:
+                playerOneScore += 1
+            
+            #resets the ball at the center when a score is made
+            ball, deltaX, ballX, ballY = ballReset(ball, deltaX, ballX, ballY)
+        
+        #display scores
+        displayPlayerOneScore(playerOneScore)
+        displayPlayerTwoScore(playerTwoScore)
+        
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+        
 # this is a prototype code for the start menu in the pong game:
 #It will have 4 options; Single Player (AI controlled), Multiplayer (Same keyboard), High Scores (From MongoDB), Options (Player colors, Difficulty(?) )
 
@@ -158,6 +178,9 @@ def Main_Menu():
     multi = False
     Scores = False
     Settings = False
+
+    #Declares DisplaySurface as global so the screen size does not change from function to function
+    global DisplaySurface
 
     #Sets the screen size and updates accordingly
     #DisplaySurface(or whatever variable name is decided upon) should be a global variable so that we are all using the same display and not creating different ones
